@@ -1,0 +1,11 @@
+-
+  Create Sale Order
+-
+  !python {model: sale.order}: |
+    self.create_api(
+        cr, uid,
+        {
+        'shop_id': ref('sale.sale_shop_1'),
+        #'company_id': ref('base.main_company'),
+        'partner_id': ref('base.res_partner_2'),
+        })
