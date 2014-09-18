@@ -2,10 +2,21 @@
   Create Sale Order
 -
   !python {model: sale.order}: |
-    self.create_api(
+    order_id = self.create_api(
         cr, uid,
         {
         'shop_id': ref('sale.sale_shop_1'),
         #'company_id': ref('base.main_company'),
         'partner_id': ref('base.res_partner_2'),
+        #'client_order_ref': 'create-api-test',
         })
+
+    self.pool['sale.order.line'].create_api(
+        cr, uid,
+        {
+        'order_id': order_id,
+        'product_id': ref('product.product_product_24'),
+        'product_uom_qty': 3,
+        })
+
+    # self.action_button_confirm(cr, uid, [order_id])

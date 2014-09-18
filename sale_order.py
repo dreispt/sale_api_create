@@ -28,22 +28,59 @@ class sale_order(orm.Model):
         partner_id
         completion_date
         """
-
+        # Original values will be forced at the end
+        original_vals = dict(vals)
+        # Calculate company from User, if not given
         if not vals.get('company_id'):
             user_obj = self.pool['res.users']
             vals['company_id'] = user_obj.browse(
                 cr, uid, uid, context=context).company_id.id
+        # Calculate Shop from Company, if not given
         if not vals.get('shop_id'):
             shop_obj = self.pool['sale.shop']
             vals['shop_id'] = shop_obj.search(
                 cr, uid, [('company_id', '=', vals['company_id'])],
                 context=context)[0]
-        # onchange shop_id
+        # Apply onchange_shop_id
         vals.update(
             self.onchange_shop_id(
-                cr, uid, [], vals['shop_id'], context=context)['value'])
-        #def onchange_partner_id(self, cr, uid, ids, part, context=None):
-        #def onchange_pricelist_id(self, cr, uid, ids, pricelist_id, order_lines, context=None):
-        print vals
+                cr, uid, [], vals['shop_id'],
+                context=context)['value'])
+        # Apply onchange_partner_id
+        assert vals.get('partner_id'), "Partner is mandatory"
+        vals.update(
+            self.onchange_partner_id(
+                cr, uid, [], vals['partner_id'],
+                context=context)['value'])
+        # Apply onchange_pricelist_id
+        vals.update(
+            self.onchange_pricelist_id(
+                cr, uid, [], vals['pricelist_id'], [],
+                context=context)['value'])
+        # Make sure original values are kept
+        vals.update(original_vals)
+        id = self.create(cr, uid, vals, context=context)
+        return id
+        # action_button_confirm(cr, uid, ids, context=None)
+
+
+class sale_order_line(orm.Model):
+    _inherit = "sale.order.line"
+
+    def create_api(self, cr, uid, vals, context=None):
+        # Original values will be forced at the end
+        original_vals = dict(vals)
+        order_id = vals['order_id']
+        order_obj = self.pool['sale.order']
+        order = order_obj.browse(cr, uid, order_id, context=context)
+        # Apply product_id_change
+        vals.update(
+            self.product_id_change(
+                cr, uid, [], order.pricelist_id.id,
+                vals['product_id'], vals['product_uom_qty'],
+                partner_id=order.partner_id.id,
+                context=context)['value'])
+        # Make sure original values are kept
+        vals.update(original_vals)
         id = self.create(cr, uid, vals, context=context)
         return id

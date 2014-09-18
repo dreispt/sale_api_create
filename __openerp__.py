@@ -21,7 +21,13 @@
     'author': 'Daniel Reis',
     'version': '7.0',
     'description': """\
-Sales Order method to simplify creation through the API
+Sales Order method to simplify creation through the API.
+
+First, call Sales Order ``create_api``, with same parameters as a standard
+create(). You might want to pass values at least for: shop_id, partner_id.
+
+Second, call a Sales Order Line ``create_api`` for each line.
+You should pass values for, at least: order_id, product_id, product_uom_qty.
 """,
     'category': 'Sales Management',
     'website': 'https://github.com/dreispt',
