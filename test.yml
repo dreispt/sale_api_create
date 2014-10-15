@@ -5,9 +5,9 @@
     order_id = self.create_api(
         cr, uid,
         {
-        'shop_id': ref('sale.sale_shop_1'),
-        #'company_id': ref('base.main_company'),
-        'partner_id': ref('base.res_partner_2'),
+        'shop_id/id': 'sale.sale_shop_1',
+        'company_id/id': 'base.main_company',
+        'partner_id/id': 'base.res_partner_2',
         #'client_order_ref': 'create-api-test',
         })
 
@@ -15,7 +15,7 @@
         cr, uid,
         {
         'order_id': order_id,
-        'product_id': ref('product.product_product_24'),
+        'product_id/id': 'product.product_product_24',
         'product_uom_qty': 3,
         })
 

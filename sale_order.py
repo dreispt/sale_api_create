@@ -19,15 +19,43 @@
 from openerp.osv import orm
 
 
+class ir_model_date(orm.Model):
+    _inherit = 'ir.model.data'
+
+    def _vals_to_ids(self, cr, uid, vals, context=None):
+        """
+        Detect ExternalIDs is the vals dict and convert them to IDs
+        ExternalIds are expected in fields names ending with '/id'
+        similar to what happens with load()
+        """
+        res = {}
+        for key, val in vals.items():
+            if key.endswith('/id'):
+                assert isinstance(val, str)
+                key = key.split('/')[0]
+                if '.' in val:
+                    module, xml_id = val.split('.')
+                else:
+                    module, xml_id = '__export__', val
+                #import pudb; pudb.set_trace()
+                val = self.get_object(cr, uid, module, xml_id).id
+                print '...', module, xml_id, val
+            res[key] = val
+        return res
+
+
 class sale_order(orm.Model):
     _inherit = "sale.order"
 
     def create_api(self, cr, uid, vals, context=None):
         """
-        company_id
-        partner_id
+        If company_id is not passed, the user's company will be used.
+        If shop_id is not passed, the first shop of the company will be used.
         completion_date
         """
+        # Translate ExternalIds into Database Ids
+        vals = self.pool['ir.model.data']._vals_to_ids(
+            cr, uid, vals, context=context)
         # Original values will be forced at the end
         original_vals = dict(vals)
         # Calculate company from User, if not given
@@ -68,6 +96,9 @@ class sale_order_line(orm.Model):
     _inherit = "sale.order.line"
 
     def create_api(self, cr, uid, vals, context=None):
+        # Translate ExternalIds into Database Ids
+        vals = self.pool['ir.model.data']._vals_to_ids(
+            cr, uid, vals, context=context)
         # Original values will be forced at the end
         original_vals = dict(vals)
         order_id = vals['order_id']
