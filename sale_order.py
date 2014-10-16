@@ -37,9 +37,7 @@ class ir_model_date(orm.Model):
                     module, xml_id = val.split('.')
                 else:
                     module, xml_id = '__export__', val
-                #import pudb; pudb.set_trace()
                 val = self.get_object(cr, uid, module, xml_id).id
-                print '...', module, xml_id, val
             res[key] = val
         return res
 
